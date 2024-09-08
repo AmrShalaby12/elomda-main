@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan QR Code</title>
+</head>
+<body>
+    
+    <style>
+        h1{
+            color: #2f2770;
+            background-color: #d9d9d9;
+            text-align: center !important;
+            width: 100%;
+        }
+        #video{
+            width: 100%;
+            height: auto;
+            border: 3px solid #2f2770;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            background-color: #2f2770;
+            
+            
+        }
+        .but-34{
+            background-color: #d9d9d9;
+            color: #2f2770;
+            border: none;
+            font-size: 25px;
+            padding: 5px;
+            border-radius: 20px;
+        }
+        b{
+            padding: 5px;
+        }
+        p{
+            background-color: #2f2770;
+            color: #d9d9d9;
+            padding: 10px;
+        }
+        li{
+            margin: 10px;
+            padding: 10px;
+            color: #2f2770;
+        }
+    </style>
+    <div style="text-align:center;width:100%">
+        <h1 class="hedder">Elomda_Bus_Scaner</h1>
+       <center> <video id="video" width="250" height="250" autoplay></video></center>
+        
+        <form id="scan-form" method="POST" action="{% url 'scan_qr' %}">
+            {% csrf_token %}
+            <input type="hidden" id="image" name="image" value="">
+           <center> <button class="but-34" type="submit">
+            <b> <i class="fa-solid fa-magnifying-glass"></i> chek qr</b>
+        </button></center>
+        </form>
+<h2 style="color: #2f2770;">data will be here</h2>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <div id="result" style="margin-top: 20px;"></div>
+        
+        <form id="attendance-form" style="display:none;" method="POST" action="{% url 'attendance' %}">
+            {% csrf_token %}
+            <input type="hidden" id="attendance_data" name="attendance_data" value="">
+            
+            <label style="background-color: #d9d9d9;margin: 10px;padding: 10px;color: #2f2770;" for="attendance_status">Attendance Status:</label>
+            <select style="background-color: #d9d9d9;margin: 10px;padding: 10px;color: #2f2770;" id="attendance_status" name="attendance_status">
+                <option value="حضور" name="attendance_status">حضور</option>
+                <option value="انصراف" name="departure_status">انصراف</option>
+            </select>
+            
+            <br><br><button class="but-34" type="submit" id="attendance-btn">Submit Attendance</button>
+        </form>
+        
+
+        
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const imageInput = document.getElementById('image');
+        const form = document.getElementById('scan-form');
+        const resultDiv = document.getElementById('result');
+        const attendanceForm = document.getElementById('attendance-form');
+        const attendanceDataInput = document.getElementById('attendance_data');
+
+        // عرض الكاميرا
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Error accessing camera: ', err);
+            });
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = canvas.toDataURL('image/png');
+    imageInput.value = imageData;
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new URLSearchParams(new FormData(form))
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            resultDiv.innerHTML = `<p style="color: #2f2770;">Error: ${data.error}</p>`;
+        } else {
+            // حساب الأيام المتبقية في JavaScript
+            const subscriptionStartDate = new Date(data.subscription_start_date);
+            const subscriptionEndDate = new Date(data.subscription_end_date);
+            const today = new Date();
+            const remainingDays = Math.ceil((subscriptionEndDate - today) / (1000 * 60 * 60 * 24));
+            const totalDays = Math.ceil((subscriptionEndDate - subscriptionStartDate) / (1000 * 60 * 60 * 24));
+
+            const table = `
+                <img src="${data.image_url}" alt="${data.name}'s Image" class="img-thumbnail" style="width: 100px; height: auto; margin-bottom: 10px;"/>
+                <p><strong>الكود:</strong> ${data.id}</p>
+                <p><strong>الاسم:</strong> ${data.name}</p>
+                <p><strong>السنه الدراسيه:</strong> ${data.category}</p>
+                <p><strong>تاريخ  بدايه الاشتراك:</strong> ${data.subscription_start_date}</p>
+                <p><strong>تايرخ نهايه الاشتراك:</strong> ${data.subscription_end_date}</p>
+                <p><strong>نوع الباقه:</strong> متبقي ${remainingDays} يوم  نوع الباقه ${totalDays} يوم</p>
+            `;
+            resultDiv.innerHTML = table;
+
+            // عرض زر الحضور بعد نجاح قراءة الـ QR
+            attendanceForm.style.display = 'block';
+            attendanceDataInput.value = JSON.stringify(data);  // تخزين بيانات الـ QR في الـ input المخفي
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '<p style="color: red;">Error scanning QR Code</p>';
+        console.error('Error:', error);
+    });
+});
+
+    </script>
+    <script src="https://kit.fontawesome.com/b828253d90.js" crossorigin="anonymous"></script>
+</body>
+</html>
