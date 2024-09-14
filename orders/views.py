@@ -47,7 +47,6 @@ def signup_view(request):
     form = UserCreationForm()
     return render(request, "orders/signup.html", {"form": form})
 
-@login_required
 def scan_qr(request):
     if request.method == 'POST':
         image_data = request.POST.get('image', None)
