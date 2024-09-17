@@ -3,121 +3,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="{% static 'orders/styles.css' %}">
-  <title>{% block title %}{% endblock %}</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href=" {% static 'orders/styles.css' %}">
+	<title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'index' %}">CAP</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'cart' %}">Shopping Cart</a>
-        </li>
-        {% if not request.user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Login</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-        </li>
-        {% endif %}
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-toggle="modal" data-target="#feedbackModal">الشكاوي والاقتراحات</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+    {% if messages %}
+    <!-- <ul class="messages"> -->
+        {% for message in messages %}
+        <div  {% if message.tags %} class="alert alert-{{message.tags}}" {% endif %} > {{ message }} </div>
+        {% endfor %}
+    <!-- </ul> -->
+    {% endif %}
+	<div class="container">	
 
-  {% if messages %}
-    {% for message in messages %}
-      <div {% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-  <div class="container">
-    {% block body %}
+
+
+	{% block body %}
     {% endblock %}
+
   </div>
-
-  <!-- Feedback Modal -->
-  <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="feedbackModalLabel">الشكاوي والاقتراحات</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="feedbackForm" method="post" action="{% url 'submit_feedback' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="rating">التقييم</label>
-                        <div id="star-rating">
-                            <i class="far fa-star" data-value="1"></i>
-                            <i class="far fa-star" data-value="2"></i>
-                            <i class="far fa-star" data-value="3"></i>
-                            <i class="far fa-star" data-value="4"></i>
-                            <i class="far fa-star" data-value="5"></i>
-                        </div>
-                        <input type="hidden" id="rating" name="rating">
-                    </div>
-                    <div class="form-group">
-                        <label for="comments">التعليقات</label>
-                        <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">إرسال</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<style>
-#star-rating .fa-star {
-    font-size: 24px;
-    cursor: pointer;
-    color: grey;
-}
-
-#star-rating .fa-star.checked {
-    color: gold;
-}
-</style>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const stars = document.querySelectorAll('#star-rating .fa-star');
-    const ratingInput = document.getElementById('rating');
-
-    stars.forEach(star => {
-        star.addEventListener('click', function () {
-            const value = this.getAttribute('data-value');
-            ratingInput.value = value;
-
-            stars.forEach(s => {
-                if (s.getAttribute('data-value') <= value) {
-                    s.classList.add('checked');
-                } else {
-                    s.classList.remove('checked');
-                }
-            });
-        });
-    });
-});
-
-</script>
   <!-- Optional JavaScript -->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

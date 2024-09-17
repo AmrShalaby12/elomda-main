@@ -5,28 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan QR Code</title>
 </head>
-<body>
+<body >
     
     <style>
         h1{
-            color: #2f2770;
-            background-color: #d9d9d9;
+            color: #007bff;;
+            background-color: #fff;;
             text-align: center !important;
             width: 100%;
         }
         #video{
-            width: 100%;
+            width: 80%;
             height: auto;
-            border: 3px solid #2f2770;
+            border: 3px solid #007bff;;
             border-radius: 30px;
             margin-bottom: 30px;
-            background-color: #2f2770;
+            background-color: #007bff;;
             
             
         }
         .but-34{
-            background-color: #d9d9d9;
-            color: #2f2770;
+            background-color: #fff;;
+            color: #007bff;;
             border: none;
             font-size: 25px;
             padding: 5px;
@@ -36,42 +36,56 @@
             padding: 5px;
         }
         p{
-            background-color: #2f2770;
+            background-color: #007bff;
             color: #d9d9d9;
             padding: 10px;
         }
         li{
             margin: 10px;
             padding: 10px;
-            color: #2f2770;
+            color: #007bff;;
         }
+        #result{
+                background-color: #007bff4b;
+                color: #fff;
+                padding: 20px;
+        }
+        #result p{
+            color: #fff;
+    } 
+
     </style>
+
+<div style="height:100vh; background-color: #ffffffa8;" class="main">
+
+    <form action="{% url 'logout' %}" method="POST" style="margin-bottom: 20px;">
+        {% csrf_token %}
+        <button class="but-34" type="submit" style="float: right; margin-bottom:10px;background-color:#007bff; color:#fff ; padding:10px" >تسجيل الخروج</button>
+    </form>
     <div style="text-align:center;width:100%">
         <h1 class="hedder">Elomda_Bus_Scaner</h1>
-       <center> <video id="video" width="250" height="250" autoplay></video></center>
+       <center> <video id="video" width="170" height="200" autoplay></video></center>
         
         <form id="scan-form" method="POST" action="{% url 'scan_qr' %}">
             {% csrf_token %}
             <input type="hidden" id="image" name="image" value="">
            <center> <button class="but-34" type="submit">
-            <b> <i class="fa-solid fa-magnifying-glass"></i> chek qr</b>
-        </button></center>
+            <b style="background-color: #007bff; color:#fff ;padding:10px;"> <i class="fa-solid fa-magnifying-glass" style="padding-right: 5px;"></i>chek qr</b>
+        </button></center> 
         </form>
-<h2 style="color: #2f2770;">data will be here</h2>
-        <canvas id="canvas" style="display:none;"></canvas>
+        <canvas id="canvas" style="display:none;background-color:#007bff"></canvas>
         <div id="result" style="margin-top: 20px;"></div>
         
-        <form id="attendance-form" style="display:none;" method="POST" action="{% url 'attendance' %}">
+        <form id="attendance-form" style="display:none;background-color:#007bff;padding-bottom:20px" method="POST" action="{% url 'attendance' %}">
             {% csrf_token %}
             <input type="hidden" id="attendance_data" name="attendance_data" value="">
             
-            <label style="background-color: #d9d9d9;margin: 10px;padding: 10px;color: #2f2770;" for="attendance_status">Attendance Status:</label>
-            <select style="background-color: #d9d9d9;margin: 10px;padding: 10px;color: #2f2770;" id="attendance_status" name="attendance_status">
+            <select style="background-color: #fff;margin: 10px;padding: 10px;color: #007bff; width:30%; text-align:center;" id="attendance_status" name="attendance_status">
                 <option value="حضور" name="attendance_status">حضور</option>
                 <option value="انصراف" name="departure_status">انصراف</option>
             </select>
             
-            <br><br><button class="but-34" type="submit" id="attendance-btn">Submit Attendance</button>
+            <br><br><button class="but-34" style="width: 40%;" type="submit" id="attendance-btn">تسجيل</button>
         </form>
         
 
@@ -129,7 +143,7 @@ form.addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            resultDiv.innerHTML = `<p style="color: #2f2770;">Error: ${data.error}</p>`;
+            resultDiv.innerHTML = `<p style="color: #007bff;;">Error: ${data.error}</p>`;
         } else {
             // حساب الأيام المتبقية في JavaScript
             const subscriptionStartDate = new Date(data.subscription_start_date);
@@ -139,7 +153,7 @@ form.addEventListener('submit', function(e) {
             const totalDays = Math.ceil((subscriptionEndDate - subscriptionStartDate) / (1000 * 60 * 60 * 24));
 
             const table = `
-                <img src="${data.image_url}" alt="${data.name}'s Image" class="img-thumbnail" style="width: 100px; height: auto; margin-bottom: 10px;"/>
+                <img src="${data.image_url}" alt="${data.name}'s Image" class="img-thumbnail" style="width: 180px; height: auto; margin-bottom: 10px;"/>
                 <p><strong>الكود:</strong> ${data.id}</p>
                 <p><strong>الاسم:</strong> ${data.name}</p>
                 <p><strong>السنه الدراسيه:</strong> ${data.category}</p>
@@ -161,6 +175,11 @@ form.addEventListener('submit', function(e) {
 });
 
     </script>
+
+    <img src="/media/qr_codes/download.gif" alt="#" style="width: 100%; height: auto;">
+
     <script src="https://kit.fontawesome.com/b828253d90.js" crossorigin="anonymous"></script>
+</div>
+
 </body>
 </html>

@@ -26,7 +26,8 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            # توجيه المستخدم إلى صفحة الـ QR بعد تسجيل الدخول
+            return HttpResponseRedirect(reverse("scan_qr"))
         else:
             return render(request, "orders/login.html", {"message": "Invalid credentials."})
     return render(request, "orders/login.html")
