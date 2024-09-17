@@ -9,6 +9,7 @@ from django.db.models import Sum, F
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 import base64
+from django.shortcuts import render
 from io import BytesIO
 from PIL import Image
 import numpy as np
